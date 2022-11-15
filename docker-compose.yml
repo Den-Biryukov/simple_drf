@@ -1,0 +1,31 @@
+version: '3.7'
+
+services:
+
+  db:
+    image: postgres:12
+    volumes:
+      - pg_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_PASSWORD: simple_drf_user
+      POSTGRES_USER: simple_drf_user
+      POSTGRES_DB: simple_drf_db
+
+  drf:
+    container_name: simple_drf_123
+    build:
+      context: ./
+      dockerfile: Dockerfile
+#    command: bash -c "python usr/src/simple_drf/manage.py migrate --noinput &&
+#             python usr/src/simple_drf/manage.py runserver 0.0.0.0:8000"
+    command: bash -c "python manage.py migrate --noinput &&
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/usr/src/simple_drf
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+volumes:
+  pg_data:
