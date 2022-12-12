@@ -4,7 +4,7 @@
 - ###_postgres_
 - ###_redis_
 - ###_celery_
-- ###_celery-beat_
+- ###celery-beat
 
 ----
 
