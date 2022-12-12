@@ -16,8 +16,6 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-#    command: bash -c "python usr/src/simple_drf/manage.py migrate --noinput &&
-#             python usr/src/simple_drf/manage.py runserver 0.0.0.0:8000"
     command: bash -c "python manage.py migrate --noinput &&
              python manage.py runserver 0.0.0.0:8000"
     volumes:
