@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3'
 
 services:
 
@@ -12,7 +12,7 @@ services:
       POSTGRES_DB: simple_drf_db
 
   drf:
-    container_name: simple_drf_123
+    container_name: simple_drf
     build:
       context: ./
       dockerfile: Dockerfile
@@ -23,9 +23,54 @@ services:
     volumes:
       - .:/usr/src/simple_drf
     ports:
-      - "8000:8000"
+      - '8000:8000'
     depends_on:
       - db
+      - redis
+
+  redis:
+    image: redis
+    container_name: redis
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redisdata:/data
+
+  celery:
+    build: .
+    restart: always
+    container_name: celery
+    command: celery -A simple_drf worker -l info
+    volumes:
+      - .:/usr/src/simple_drf
+    environment:
+      - DEBUG=1
+      - DJANGO_ALLOWED_HOSTS=localhost 0.0.0.1 [::1]
+      - CELERY_BROKER_URL = 'redis://redis:6379'
+      - CELERY_RESULT_BACKEND = 'redis://redis:6379'
+    depends_on:
+      - db
+      - redis
+      - drf
+
+  celery-beat:
+    build: .
+    restart: always
+    container_name: celery_beat
+    command: celery -A simple_drf beat -l info
+    volumes:
+      - .:/usr/src/simple_drf
+    environment:
+      - DEBUG=1
+      - DJANGO_ALLOWED_HOSTS=localhost 0.0.0.1 [::1]
+      - CELERY_BROKER_URL = 'redis://redis:6379'
+      - CELERY_RESULT_BACKEND = 'redis://redis:6379'
+    depends_on:
+      - db
+      - redis
+      - celery
 
 volumes:
   pg_data:
+  redisdata:
